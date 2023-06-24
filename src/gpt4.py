@@ -12,15 +12,16 @@ if openai.api_key is None:
 functions = [
     {
         "name": "terminal_command_executor",
-        "description": "Runs all the instructions specified by the user in one single terminal command",
+        "description": "Runs all the instructions specified by the user. Completions will be run in a loop until you have completed the task given by the user or if the task is impossible to complete. You can try to run all the commands the user has requested in one command. Please set the 'end_of_command' parameter to 'False' if you are executing a command as you will need to know if the command runs successfully as the output of the command will be provided to you in the loop.",
         "parameters": {
             "type": "object",
             "properties": {
                 "command": {"type": "string", "description": "The terminal command to execute."},
+                "end_of_command": {"type": "boolean", "description": "set this to True if you have completed the task given by the user or if the task is impossible to complete and if you are not executing a command in this response."},
             },
-            "required": ["command"],
+            "required": ["command", "end_of_command"],
         },
-    }
+    },
 ]
 
 def send_input(user_input, context):
@@ -45,7 +46,7 @@ def send_input(user_input, context):
 
         # If the function name is "terminal_command_executor", return the command
         if function_name == "terminal_command_executor":
-            return function_args.get("command")
+            return function_args.get("command", "end_of_command")
 
     # If the response message does not contain a function call, return the content of the message
     return response_message["content"]
